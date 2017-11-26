@@ -1,8 +1,19 @@
+#ifndef STDLIB_H
+#define STDLIB_H
 
+#include <stdlib.h>
+#endif
 
-//TODO : define as needed (#IFNDEF)
+#ifndef STDIO_H
+#define STDIO_H
+
+#include <stdio.h>
+#endif
+
+#ifndef TEXT_H
+#define TEXT_H
 #include "IO/TextFileUtilities.h"
-
+#endif
 
 int main(int argc, char **argv) {
     openFile(argv[1]);
@@ -18,5 +29,5 @@ char** openFile(char *fileName){
     char* line = NULL;
     ssize_t linelen = 0;
     //TODO : continue from here 
-
+    
 }
