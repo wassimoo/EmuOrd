@@ -5,12 +5,11 @@
 
 
 int main(int argc, char **argv) {
-    //openFile(argv[1]);
-    getproc(argv, argc);
+    openFile(argv[1]);
     return 0;
 }
 
-/*char** openFile(char *fileName){
+char** openFile(char *fileName){
     FILE *fp ;
     if(! (fp = fopen(fileName,"r")))
         return NULL;
@@ -18,6 +17,6 @@ int main(int argc, char **argv) {
     char** fileLines;
     char* line = NULL;
     ssize_t linelen = 0;
+    //TODO : continue from here 
 
-
-}*/
+}
