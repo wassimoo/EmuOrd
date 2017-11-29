@@ -4,9 +4,14 @@
 
 #include "TextFileUtilities.h"
 
+#ifndef QUEUE_H
+#define QUEUE_H
 
-procQueue *rear;
-procQueue *front;
+#include "../QUEUE/QUEUE.h"
+
+#endif
+    procQueue* front ;
+    procQueue* rear;
 
 // Having all file lines in pointer to pointer **node,
 // elimComments eliminates all comments including inline comments.
@@ -17,7 +22,7 @@ void elimComments(stringNode **node) {
 
     cpy = *node;
     int deletedNode = 0; // deletedNode flag to avoid skipping one node after deletion
-    int onComment = -1; // onComment index to indicate if current char is currently commented (-1 not commented, other index of first char comment in line)
+    int onComment = -1; // onComment index to indicate if current char is currently commented (-1 not commented, other is the index of the first char comment in line)
 
     while (cpy->next != NULL) {
         int i = 0;
@@ -96,12 +101,122 @@ void closeFile(FILE **fp) {
     }
 }
 
-procQueue *getproc(char *lines[], int numLine) {
+
+void enqueueProc(stringNode *node) {
     front = NULL;
     rear = NULL;
+    while(node){
+        // TODO : life is not always colored, so users aren't always friendly..
+        // check valid types, whether all data are present or not ...
+        PCB *pcbProc = (PCB*) malloc(sizeof(PCB));
+        char *lineCpy = node->line;
+        int len;
 
-    int i;
-    for (i = 0; i < numLine; i++) {
-        //TODO : left from here
+        /*  id   */
+        len = nextWord(&lineCpy,' ');
+        pcbProc->id = atoi(lineCpy);
+
+        /*  name   */
+        lineCpy += len;
+        len = nextWord(&lineCpy,' ');
+        pcbProc->name = strdup(lineCpy);
+
+        /*  IONum   */
+        lineCpy += len;
+        len = nextWord(&lineCpy,' ');
+        pcbProc->owner = strdup(lineCpy);
+
+        /*  priority   */
+        lineCpy += len;
+        len = nextWord(&lineCpy,' ');
+        pcbProc->priority = atoi(lineCpy);
+
+        /* Creation Date */
+        lineCpy += len;
+        len = nextWord(&lineCpy,' ');
+        pcbProc->creationDate = extractDate(lineCpy);
+
+        /*  cpuCycles   */
+        lineCpy += len;
+        len = nextWord(&lineCpy,' ');
+        pcbProc->cpuCycles = atoi(lineCpy);
+
+
+        /*  IONum   */
+        lineCpy += len;
+        len = nextWord(&lineCpy,' ');
+        pcbProc->IONum = atoi(lineCpy);
+
+        /* Estimated Memory Size */
+        //TODO : ???
+
+        
+        pcbProc->state = NEW;
+        node = node->next;
+        Enqueue(*pcbProc);
     }
+}
+
+//Warning : Some real ugly coding :(
+ int nextWord(char **c, char sep){
+     
+     if(*(*c) != sep && *(*c) != '\0')
+        goto nextWhite;
+
+    //look for next non white space
+    while((*c)++){
+        if(*(*c) == '\0')
+            return -1;
+        else if(*(*c) != sep)
+            break;
+    }
+
+    //look for next whitespace xD
+    int i;
+    nextWhite:
+    i = 1;
+    while(*((*c)+i) != sep && *((*c)+i) != '\0') i++;
+
+     *((*c)+i) = '\0';
+
+    return i;
+}
+
+// TODO : think of iterating over struct fields using pointers as they are all of same type (int)
+Date extractDate(char *stringedDate){
+    /*Format : MS:SS:MN:HH[:DD[:MM[:YY]]] */
+
+    Date d = {-1,-1,-1,-1,-1,-1,-1};
+    
+    nextWord(&stringedDate,':');
+    d.millisecond = atoi(stringedDate);
+    stringedDate +=2;
+    
+    nextWord(&stringedDate,':');
+    d.second = atoi(stringedDate);
+    stringedDate +=2;
+
+    nextWord(&stringedDate,':');
+    d.minute = atoi(stringedDate);
+    stringedDate +=2;
+
+    if(nextWord(&stringedDate,':') == -1)
+        goto returnDate;
+    //else
+    d.day = atoi(stringedDate);
+    stringedDate += 2;
+
+    if(nextWord(&stringedDate,':') == -1)
+        goto returnDate;
+    //else
+    d.month = atoi(stringedDate);
+    stringedDate += 2;
+
+    if(nextWord(&stringedDate,':') == -1)
+        goto returnDate;
+    //else
+    d.year = atoi(stringedDate);
+
+    returnDate: 
+        return d;
 }

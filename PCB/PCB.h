@@ -14,7 +14,7 @@
 // IO status information: includes a list of I/O devices allocated to the process.
 
 enum processState {
-    ZOMBIE, NEW, READY, WAITING, SUSPENDED, RUNNING, ENDED
+    ZOMBIE = -1 , NEW, READY, WAITING, SUSPENDED, RUNNING, ENDED
 }; //TODO : add swapped states
 
 typedef struct {
@@ -35,8 +35,8 @@ typedef struct pcb {
     int priority;
 
     enum processState state;
-    Date createdDate;
-    Date *limitTime;
+    Date creationDate;
+    Date *limitTime; //remove ?
     int cpuCycles;
     int IONum;
     float estimatedMemorySize;  //in bytes

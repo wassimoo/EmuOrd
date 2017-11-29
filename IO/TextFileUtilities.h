@@ -41,4 +41,8 @@ void getLines(FILE *fp, stringNode **node);
 
 void elimComments(stringNode **node);
 
-procQueue *getproc(char *lines[], int numLine);
+void enqueueProc(stringNode *node);
+
+int nextWord(char **c, char sep);
+
+Date extractDate(char *stringedDate);

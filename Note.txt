@@ -2,5 +2,5 @@ Note :
     # on n'oublie pas de traiter les cas suivants #
         * Les processus ne sont pas nécessairement triés dans le fichier (il faut les trier selon la date d'arrivée)
         * Les commentaires peuvent être au milieu d'une ligne de decription de processus (faut l'elliminer touts d'abord)
+        * Aprés la suppréssion d'une commnetaire d'une ligne laisser une espace vide.
         * si la taille de la memoire est presque plein on utilise le swapping
-K
