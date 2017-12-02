@@ -22,7 +22,7 @@ void elimComments(stringNode **node) {
     int deletedNode = 0; // deletedNode flag to avoid skipping one node after deletion
     int onComment = -1; // onComment index to indicate if current char is currently commented (-1 not commented, other is the index of the first char comment in line)
 
-    while (cpy->next != NULL) {
+    while (cpy) {
         int i = 0;
         if (cpy->line[i] == '\0') {
             deleteNode(node, &cpy);
