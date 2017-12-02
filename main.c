@@ -1,4 +1,8 @@
+#ifndef MAIN_H
+#define MAIN_H
 #include "main.h"
+
+#endif
 
 int main(int argc, char **argv) {
     stringNode *lines = NULL;

@@ -13,6 +13,7 @@
 // Accounting information: includes the amount of CPU used for process execution, time limits, execution ID etc.
 // IO status information: includes a list of I/O devices allocated to the process.
 
+
 enum processState {
     ZOMBIE = -1 , NEW, READY, WAITING, SUSPENDED, RUNNING, ENDED
 }; //TODO : add swapped states

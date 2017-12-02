@@ -8,8 +8,6 @@
 
 #endif
 
-#include <stdlib.h>
-
 
 // To Enqueue a PCB
 void Enqueue(PCB new) {

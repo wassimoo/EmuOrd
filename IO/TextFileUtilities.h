@@ -2,12 +2,6 @@
 // Created by wassim on 25/11/17.
 //
 
-#ifndef QUEUE_H
-#define QUEUE_H
-
-#include "../QUEUE/QUEUE.h"
-
-#endif
 
 #ifndef STDIO_H
 #define STDIO_H
@@ -30,6 +24,15 @@
 
 #endif
 
+
+#ifndef QUEUE_H
+#define QUEUE_H
+
+#include "../QUEUE/QUEUE.h"
+
+#endif
+
+
 typedef struct stringnode {
     char *line;
     struct stringnode *next;
@@ -46,3 +49,7 @@ void enqueueProc(stringNode *node);
 int nextWord(char **c, char sep);
 
 Date extractDate(char *stringedDate);
+
+void deleteNode(stringNode **head, stringNode **node);
+
+stringNode *seekPrev(stringNode *head, stringNode *node);

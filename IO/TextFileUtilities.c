@@ -1,24 +1,22 @@
 //
 // Created by wassim on 25/11/17.
 //
-
+#ifndef TEXT_H
+#define TEXT_H
 #include "TextFileUtilities.h"
 
-#ifndef QUEUE_H
-#define QUEUE_H
-
-#include "../QUEUE/QUEUE.h"
-
 #endif
-    procQueue* front ;
+
+
+procQueue* front ;
     procQueue* rear;
 
 // Having all file lines in pointer to pointer **node,
 // elimComments eliminates all comments including inline comments.
 void elimComments(stringNode **node) {
-    // '#' introduces full line comment,
+    // '#' introduces full line comment,<>
     // '<' & '>' introduces Multi-inline comments
-    stringNode *cpy = (stringNode *) malloc(sizeof(stringNode));
+    stringNode *cpy;
 
     cpy = *node;
     int deletedNode = 0; // deletedNode flag to avoid skipping one node after deletion
@@ -26,15 +24,16 @@ void elimComments(stringNode **node) {
 
     while (cpy->next != NULL) {
         int i = 0;
+        if (cpy->line[i] == '\0') {
+            deleteNode(node, &cpy);
+            deletedNode = 1;
+        }
         while (cpy->line[i] != '\0') {
             //Full line Comment
             if (cpy->line[i] == '#') {
                 if (i + 1 == 1) {
                     //line is Empty so we delete it
-                    stringNode *p = *node;
-                    *node = (*node)->next;
-                    cpy = *node;
-                    free(p);
+                    deleteNode(node, &cpy);
                     deletedNode = 1;
                     break;
                 } else {
@@ -80,13 +79,18 @@ void getLines(FILE *fp, stringNode **node) {
 
     stringNode *new = (stringNode *) malloc(sizeof(stringNode));
     *node = new;
-
-    while ((linelen = getline(&line, &linecap, fp)) != -1) {
+    int hasMore = 1;
+    hasMore = ((linelen = getline(&line, &linecap, fp)) != -1) ? 1 : 0;
+    while (hasMore) {
         if (linelen && (line[linelen - 1] == '\n' || line[linelen - 1] == '\r'))
             line[--linelen] = '\0';
         new->line = strdup(line);
-        new->next = (stringNode *) malloc(sizeof(stringNode));
-        new = new->next;
+        if ((linelen = getline(&line, &linecap, fp)) != -1) {
+            hasMore = 1;
+            new->next = (stringNode *) malloc(sizeof(stringNode));
+            new = new->next;
+        } else
+            break;
     }
 }
 
@@ -100,7 +104,6 @@ void closeFile(FILE **fp) {
         *fp = NULL;
     }
 }
-
 
 void enqueueProc(stringNode *node) {
     front = NULL;
@@ -187,11 +190,11 @@ Date extractDate(char *stringedDate){
     /*Format : MS:SS:MN:HH[:DD[:MM[:YY]]] */
 
     Date d = {-1,-1,-1,-1,-1,-1,-1};
-    
+
     nextWord(&stringedDate,':');
     d.millisecond = atoi(stringedDate);
     stringedDate +=2;
-    
+
     nextWord(&stringedDate,':');
     d.second = atoi(stringedDate);
     stringedDate +=2;
@@ -217,6 +220,35 @@ Date extractDate(char *stringedDate){
     //else
     d.year = atoi(stringedDate);
 
-    returnDate: 
+    returnDate:
         return d;
+}
+
+void deleteNode(stringNode **head, stringNode **node) {
+    stringNode *tmp;
+    if (!*head)
+        return;
+    if (*head == *node) {
+        tmp = *head;
+        *head = (*head)->next;
+        free(tmp);
+        *node = *head;
+        return;
+    }
+
+    stringNode *prev = seekPrev(*head, *node);
+    tmp = prev->next;
+    prev->next = (*node)->next;
+    free(tmp);
+    *node = prev->next;
+}
+
+stringNode *seekPrev(stringNode *head, stringNode *node) {
+    if (!head) return NULL;
+
+    while (head) {
+        if (head->next == node)
+            return head;
+        head = head->next;
+    }
 }
