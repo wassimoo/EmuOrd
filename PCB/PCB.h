@@ -56,3 +56,5 @@ int initPcb();
 int updatePcb();
 
 int endPcb();
+
+int cmpDate(Date d1, Date d2);

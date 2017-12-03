@@ -22,15 +22,15 @@
 
 #endif
 
-typedef struct procqueue {
+typedef struct pcbnode {
     PCB current;
-    struct procqueue *next;
-} procQueue;
+    struct pcbnode *next;
+} PCBNODE;
 
 // Two glboal variables to store address of front and rear nodes.
 
-extern procQueue *front;
-extern procQueue *rear;
+extern PCBNODE *front;
+extern PCBNODE *rear;
 
 // To Enqueue a PCB.
 void Enqueue(PCB new);
@@ -40,3 +40,7 @@ void Dequeue();
 
 //get front
 PCB *getFront();
+
+void QueueInsertInSorted(PCBNODE **head, PCBNODE *new);
+
+void QueueSort();

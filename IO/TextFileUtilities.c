@@ -8,8 +8,8 @@
 #endif
 
 
-procQueue* front ;
-    procQueue* rear;
+PCBNODE *front;
+PCBNODE *rear;
 
 // Having all file lines in pointer to pointer **node,
 // elimComments eliminates all comments including inline comments.
@@ -203,19 +203,22 @@ Date extractDate(char *stringedDate){
     d.minute = atoi(stringedDate);
     stringedDate +=2;
 
-    if(nextWord(&stringedDate,':') == -1)
+    nextWord(&stringedDate, ':');
+    if (*stringedDate < '0' || *stringedDate > '9')
         goto returnDate;
     //else
     d.day = atoi(stringedDate);
     stringedDate += 2;
 
-    if(nextWord(&stringedDate,':') == -1)
+    nextWord(&stringedDate, ':');
+    if (*stringedDate < '0' || *stringedDate > '9')
         goto returnDate;
     //else
     d.month = atoi(stringedDate);
     stringedDate += 2;
 
-    if(nextWord(&stringedDate,':') == -1)
+    nextWord(&stringedDate, ':');
+    if (*stringedDate < '0' || *stringedDate > '9')
         goto returnDate;
     //else
     d.year = atoi(stringedDate);
