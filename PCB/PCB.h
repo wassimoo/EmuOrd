@@ -13,21 +13,15 @@
 // Accounting information: includes the amount of CPU used for process execution, time limits, execution ID etc.
 // IO status information: includes a list of I/O devices allocated to the process.
 
+#ifndef DATE_H
+#define DATE_H
+#include "../Date/Date.h"
+#endif //DATE_H
 
 enum processState {
-    ZOMBIE = -1 , NEW, READY, WAITING, SUSPENDED, RUNNING, ENDED
+    ZOMBIE = -1 , NEW, READY, WAITING, SUSPENDED, RUNNING, TERMINATED
 }; //TODO : add swapped states
 
-typedef struct {
-    int
-            millisecond,
-            second,
-            minute,
-            hour,
-            day,
-            month,
-            year;
-} Date;
 
 typedef struct pcb {
     int id;
@@ -37,9 +31,10 @@ typedef struct pcb {
 
     enum processState state;
     Date creationDate;
-    Date *limitTime; //remove ?
-    int cpuCycles;
-    int IONum;
+    Date limitTime; //Needed for EDF
+    Date remExecTime;
+    Date cpuCycles;
+    Date ioTime;
     float estimatedMemorySize;  //in bytes
 
     struct pcb *father;
@@ -51,10 +46,9 @@ typedef struct pcb {
     */
 } PCB;
 
-int initPcb();
+int initPcb(PCB *pcb);
 
 int updatePcb();
 
 int endPcb();
 
-int cmpDate(Date d1, Date d2);

@@ -1,9 +1,10 @@
 //
 // Created by wassim on 25/11/17.
 //
-#ifndef QUEUE_Hcritice QUEUE_H
+#ifndef QUEUE_H
+#define QUEUE_H
 
-#include "QUEUE.h"
+#include "Queue.h"
 
 #endif
 
@@ -19,24 +20,32 @@ void Enqueue(PCB new_pcb) {
         front = rear = new;
         return;
     }
+    
+    PCBNODE *tmp = front;
+    PCBNODE *prev = (PCBNODE *) malloc(sizeof(PCBNODE));
+    prev->next = front;
 
-    // lastest created processes 
-    if (cmpDate((rear->current).creationDate, (new->current).creationDate) <= 0) {
-        new->next = rear;
-        rear = new;
-        return;
-    }
-
-    PCBNODE *tmp = rear;
-    //  Look for the right position to insert new process in QUEUE
+    //  Look for the right position to insert new process in Queue
     //  stops if reaches the end of queue
-    //  or found creationDate < new process creation date
-    while (tmp->next && cmpDate((tmp->current).creationDate, (new->current).creationDate) > 0)
-        tmp = tmp->next;
-    new->next = tmp->next;
-    if (!tmp->next) front = new;
-    tmp->next = new;
+    //  or found creationDate > new process creation date
 
+    for(tmp,prev;
+        tmp && cmpDate((tmp->current).creationDate,(new->current).creationDate)<0;
+        tmp=tmp->next, prev= prev->next);
+
+    if(!tmp){ //rear
+        rear->next = new;
+        new->next = NULL;
+        rear = new;
+    }
+    else if(tmp == front){ //front
+        new->next = front;
+        front = new;
+    }
+    else{
+        prev->next = new;
+        new->next = tmp;
+    }
 }
 
 // To Dequeue a PCB.
