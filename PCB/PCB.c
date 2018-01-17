@@ -5,20 +5,24 @@
 #ifndef PCB_H
 #define PCB_H
 #include "PCB.h"
-#endif
 
+#endif
 
 
 //TODO: modify pcb functions arguments to satisfy our needs
 
-int initPcb() {
+#ifndef DATE_H
+#define DATE_H
+#include "../Date/Date.h"
+#endif //DATE_H
 
+int initPcb(PCB *pcb) {
+    pcb->remExecTime = addDates(pcb->ioTime,pcb->cpuCycles);
 }
 
 int updatePcb() {
-
 }
 
 int endPcb() {
-
 }
+

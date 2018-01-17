@@ -1,15 +1,52 @@
 //
 // Created by wassim on 25/11/17.
 //
+
+
+#ifndef STDIO_H
+#define STDIO_H
+
+#include <stdio.h>
+
+#endif
+
+#ifndef STDLIB_H
+#define STDLIB_H
+
+#include <stdlib.h>
+
+#endif
+
+#ifndef STRING_H
+#define STRING_H
+
+#include <string.h>
+
+#endif
+
+
+#ifndef QUEUE_H
+#define QUEUE_H
+
+#include "../Queue/Queue.h"
+
+#endif
+
 #ifndef TEXT_H
 #define TEXT_H
 #include "TextFileUtilities.h"
 
 #endif
 
+#ifndef DATE_H
+#define DATE_H
+#include "../Date/Date.h"
+#endif //DATE_H
 
-procQueue* front ;
-    procQueue* rear;
+
+
+PCBNODE *front;
+PCBNODE *rear;
 
 // Having all file lines in pointer to pointer **node,
 // elimComments eliminates all comments including inline comments.
@@ -113,7 +150,7 @@ void enqueueProc(stringNode *node) {
         // check valid types, whether all data are present or not ...
         PCB *pcbProc = (PCB*) malloc(sizeof(PCB));
         char *lineCpy = node->line;
-        int len;
+        int len; // pos of next char -to skip whitespaces
 
         /*  id   */
         len = nextWord(&lineCpy,' ');
@@ -124,7 +161,7 @@ void enqueueProc(stringNode *node) {
         len = nextWord(&lineCpy,' ');
         pcbProc->name = strdup(lineCpy);
 
-        /*  IONum   */
+        /*  ioTime   */
         lineCpy += len;
         len = nextWord(&lineCpy,' ');
         pcbProc->owner = strdup(lineCpy);
@@ -137,18 +174,20 @@ void enqueueProc(stringNode *node) {
         /* Creation Date */
         lineCpy += len;
         len = nextWord(&lineCpy,' ');
-        pcbProc->creationDate = extractDate(lineCpy);
+        pcbProc->creationDate = extractDate(&lineCpy);
 
         /*  cpuCycles   */
-        lineCpy += len;
         len = nextWord(&lineCpy,' ');
-        pcbProc->cpuCycles = atoi(lineCpy);
+        pcbProc->cpuCycles = extractDate(&lineCpy);
 
 
-        /*  IONum   */
-        lineCpy += len;
+        /*  ioTime   */
         len = nextWord(&lineCpy,' ');
-        pcbProc->IONum = atoi(lineCpy);
+        pcbProc->ioTime = extractDate(&lineCpy);
+
+        /* Remmaining Executing Time */
+
+        pcbProc->remExecTime = addDates(pcbProc->cpuCycles,pcbProc->ioTime);
 
         /* Estimated Memory Size */
         //TODO : ???
@@ -156,11 +195,12 @@ void enqueueProc(stringNode *node) {
         
         pcbProc->state = NEW;
         node = node->next;
+
         Enqueue(*pcbProc);
     }
 }
 
-//Warning : Some real ugly coding :(
+//Warning : Some real ugly code :(
  int nextWord(char **c, char sep){
      
      if(*(*c) != sep && *(*c) != '\0')
@@ -186,39 +226,46 @@ void enqueueProc(stringNode *node) {
 }
 
 // TODO : think of iterating over struct fields using pointers as they are all of same type (int)
-Date extractDate(char *stringedDate){
+Date extractDate(char **stringedDate){
     /*Format : MS:SS:MN:HH[:DD[:MM[:YY]]] */
 
     Date d = {-1,-1,-1,-1,-1,-1,-1};
 
-    nextWord(&stringedDate,':');
-    d.millisecond = atoi(stringedDate);
-    stringedDate +=2;
+    nextWord(stringedDate,':');
+    d.millisecond = atoi(*stringedDate);
+    *stringedDate +=2;
 
-    nextWord(&stringedDate,':');
-    d.second = atoi(stringedDate);
-    stringedDate +=2;
+    nextWord(stringedDate,':');
+    d.second = atoi(*stringedDate);
+    *stringedDate +=2;
 
-    nextWord(&stringedDate,':');
-    d.minute = atoi(stringedDate);
-    stringedDate +=2;
+    nextWord(stringedDate,':');
+    d.minute = atoi(*stringedDate);
+    *stringedDate +=2;
 
-    if(nextWord(&stringedDate,':') == -1)
+    nextWord(stringedDate,':');
+    d.hour = atoi(*stringedDate);
+    *stringedDate +=2;
+
+    nextWord(stringedDate, ':');
+    if (**stringedDate < '0' || **stringedDate > '9')
         goto returnDate;
     //else
-    d.day = atoi(stringedDate);
-    stringedDate += 2;
+    d.day = atoi(*stringedDate);
+    *stringedDate += 2;
 
-    if(nextWord(&stringedDate,':') == -1)
+    nextWord(stringedDate, ':');
+    if (**stringedDate < '0' || **stringedDate > '9')
         goto returnDate;
     //else
-    d.month = atoi(stringedDate);
-    stringedDate += 2;
+    d.month = atoi(*stringedDate);
+    *stringedDate += 2;
 
-    if(nextWord(&stringedDate,':') == -1)
+    nextWord(stringedDate, ':');
+    if (**stringedDate < '0' || **stringedDate > '9')
         goto returnDate;
     //else
-    d.year = atoi(stringedDate);
+    d.year = atoi(*stringedDate);
 
     returnDate:
         return d;

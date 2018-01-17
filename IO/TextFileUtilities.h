@@ -1,37 +1,10 @@
 //
 // Created by wassim on 25/11/17.
 //
-
-
-#ifndef STDIO_H
-#define STDIO_H
-
-#include <stdio.h>
-
+#ifndef PCB_H
+#define PCB_H
+#include "../PCB/PCB.h"
 #endif
-
-#ifndef STDLIB_H
-#define STDLIB_H
-
-#include <stdlib.h>
-
-#endif
-
-#ifndef STRING_H
-#define STRING_H
-
-#include <string.h>
-
-#endif
-
-
-#ifndef QUEUE_H
-#define QUEUE_H
-
-#include "../QUEUE/QUEUE.h"
-
-#endif
-
 
 typedef struct stringnode {
     char *line;
@@ -48,7 +21,7 @@ void enqueueProc(stringNode *node);
 
 int nextWord(char **c, char sep);
 
-Date extractDate(char *stringedDate);
+Date extractDate(char **stringedDate);
 
 void deleteNode(stringNode **head, stringNode **node);
 

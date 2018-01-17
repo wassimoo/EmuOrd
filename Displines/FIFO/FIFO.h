@@ -6,3 +6,5 @@
 #define EMUORD_FIFO_H
 
 #endif //EMUORD_FIFO_H
+
+void exec();
