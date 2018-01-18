@@ -2,9 +2,13 @@
 // Created by wassim on 25/11/17.
 //
 
-#ifndef EMUORD_FIFO_H
-#define EMUORD_FIFO_H
+#ifndef EMUORD_LINKEDLIST_H
+#define EMUORD_LINKEDLIST_H
 
-#endif //EMUORD_FIFO_H
+#include "../../LinkedList/LinkedList.h"
+
+#endif
 
 void exec();
+
+int updateExecutionQueue(LinkedList **head);
