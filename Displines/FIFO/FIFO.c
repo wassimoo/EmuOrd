@@ -9,10 +9,15 @@
 
 #endif
 
+#ifndef FIFO_H
+#define FIFO_H
+
+#include "FIFO.h"
+
+#endif
+
 #ifndef LIMITS_H
 #define LIMITS_H
-
-#include <limits.h>
 
 #endif
 
@@ -35,7 +40,6 @@
 
 #include "../../EmuProcess/execute.h"
 
-
 #ifndef DATE_H
 #define DATE_H
 
@@ -47,16 +51,19 @@
 #ifndef TIME_H
 #define TIME_H
 
-#include <time.h>
+#endif
 
+#ifndef EMUORD_LINKEDLIST_H
+#define EMUORD_LINKEDLIST_H
+
+#include "../../LinkedList/LinkedList.h"
 #endif
 
 PCBNODE *front;
 PCBNODE *rear;
 
-
 pthread_cond_t pthreadCond = PTHREAD_COND_INITIALIZER; /* Création de la condition */
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER; /* Création du mutex */
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;      /* Création du mutex */
 
 struct pthreadArgs {
     char *procName;
@@ -66,76 +73,110 @@ struct pthreadArgs {
 
 struct syncChannel synchInfo;
 
-//TODO : add NEW process state ! when creation time matches current system time
-
+/*
+  * Execute in Queue Order .. No priority, No interruption
+ */
 void exec() {
+    LinkedList *ExecutionQueue = NULL;
+    PCB thisPcb;
+    pthread_t tid;                        //Init new Thread ID
+    struct pthreadArgs args;              //Args to be passed to process worker
+    char processIsRunning = 0;            // process is Runing flag
+    int nextIn;
 
-    //Execute in Queue Order .. No priority, No interruption
-    for (front; front != NULL; front = front->next) {
+    //We have more process to come from Main Queue, or we are already Executing process ot We have More to Execute
+    while ((nextIn = updateExecutionQueue(&ExecutionQueue)) != -1 || processIsRunning || ExecutionQueue != NULL) {
+        if (!processIsRunning) {
+            if (nextIn > 0) {
+                // sleep in seconds
+                printf("waiting for %d  seconds : \n", nextIn);
+                sleep(nextIn);
+            }
 
-        //verify process creationDate is still valid
-        //consume time till creation time comes
-        //while(front->current.id == 1575)
-        unsigned int diff;
-        short isValidDate;
-        diff = DateDiffrence(front->current.creationDate, &isValidDate);
-        if (!isValidDate)
-            continue;
-        if ((diff) > 0) // sleep in seconds
-        {
-            printf("waiting for '%s' %d seconds : \n", front->current.name, diff);
-            sleep(diff);
-            goto sleepNano;
-        } else if (diff == 0) {
-            sleepNano:
+            thisPcb = ExecutionQueue->data;
+            args.procName = thisPcb.name;
+            args.procId = thisPcb.id;
+            args.remExecTime = thisPcb.remExecTime;
+
+            // sleep in mS
             printf("Reached !! waiting in milliseconds : \n");
             struct timespec ts;
             ts.tv_sec = 0;
-            ts.tv_nsec = 1000000 * front->current.creationDate.millisecond;
+            ts.tv_nsec = 1000000 * thisPcb.creationDate.millisecond;
             nanosleep(&ts, NULL);
-        } else
-            continue;
 
-        pthread_t tid; //Init new Thread ID
-        //Args to be passed to process worker
-        struct pthreadArgs args = {front->current.name, front->current.id, front->current.remExecTime};
-
-        /*
+            /*
          * Process is Ready !
          */
-        front->current.state = READY;
-        synchInfo.state = READY;
+            thisPcb.state = READY;
+            synchInfo.state = READY;
 
-        pthread_create(&tid, NULL, worker, (void *) &args); //Thread created ! process is running
+            pthread_create(&tid, NULL, worker, (void *) &args); //Thread created ! process is running
+            processIsRunning = 1;
+        }
 
         /*
-         * Keep on looking for TERMINATED `signal` ..
-         * if so :
-         *    Change process state and break loop (move to next process)
-         * else :
-         *    Synchronize process state && continue looping
-         */
-        while (1) {
-            pthread_mutex_lock(&lock);//lock on shared variables
-            if (synchInfo.state == TERMINATED) {
-                front->current.state = TERMINATED;
-                /*
+         * Look for TERMINATED `signal` ..
+         * if found :
+         *    Change process state and set processIsRuning flag to false to execute next process
+         *  else:
+         *    continue....
+        */
+
+        pthread_mutex_lock(&lock); //lock on shared variables
+        if (synchInfo.state == TERMINATED) {
+            thisPcb.state = TERMINATED;
+            /*
                 int s = pthread_cancel(tid);
                 if(s != 0)
                     printf("Couldn't terminate thread");
                  */
-                pthread_mutex_unlock(&lock);
-                break;
-            } else if (front->current.state != synchInfo.state) {
-                // Synchronize PCB with Current State
-                front->current.state = synchInfo.state;
-            }
-            pthread_mutex_unlock(&lock); //unlock shared variables .. may thread continue working in peace
+            processIsRunning = 0;
+            //We move to the next process
+            ExecutionQueue = ExecutionQueue->next;
+        } else if (thisPcb.state != synchInfo.state) {
+            // Synchronize PCB with Current State
+            thisPcb.state = synchInfo.state;
         }
-        /*{
-            //pthread_cond_signal(&pthreadCond);
-            pthread_mutex_unlock (&lock);
-        }*/
-
+        pthread_mutex_unlock(&lock); //unlock shared variables .. may thread continue working in peace
     }
 }
+
+/*
+  * Returns  -1 if ProcessQueue is NULL
+  * Returns  seconds till next process execution time
+ */
+int updateExecutionQueue(LinkedList **head) {
+    unsigned int diff = 0;
+    short isValidDate;
+    PCBNODE *tmp;
+
+    while (front) {
+        diff = DateDiffrence(front->current.creationDate, &isValidDate);
+        if (!isValidDate) {
+            tmp = front;
+            front = front->next;
+            free(tmp);
+        } else if (diff == 0) { //don't think append it
+            front->current.state = READY;
+            append(head, front->current);
+            tmp = front;
+            front = front->next;
+            free(tmp);
+        } else if (*head == NULL) { //we can't return empty handed
+            front->current.state = NEW;
+            append(head, front->current);
+            tmp = front;
+            front = front->next;
+            free(tmp);
+            return diff;
+        }
+    }
+    return -1;
+}
+
+
+/*{
+    //pthread_cond_signal(&pthreadCond);
+    pthread_mutex_unlock (&lock);
+}*/
